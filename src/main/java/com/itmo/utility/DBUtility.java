@@ -28,10 +28,6 @@ public class DBUtility {
                 String password = prop.getProperty("password");
                 Class.forName(driver);
                 connection = DriverManager.getConnection(url, user, password);
-                //Statement st = connection.createStatement();
-                //st.executeUpdate("create table users(login VARCHAR(20), password VARCHAR(20))");
-                //st.executeUpdate("insert into users(login, password) values ('admin', 'password')");
-                //st.close();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             } catch (SQLException e) {

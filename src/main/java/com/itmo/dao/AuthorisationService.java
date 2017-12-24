@@ -17,20 +17,26 @@ public class AuthorisationService {
     public AuthorisationService() {
         connection = DBUtility.getConnection();
     }
-//    public void addUser(User user) {
-//        try {
-//            PreparedStatement preparedStatement = connection
-//                    .prepareStatement("insert into users(login,password,user_type) values (?, ?, ?)");
-//            System.out.println("User:"+user.getLogin());
-//            preparedStatement.setString(1, user.getPassword());
-//            preparedStatement.setString(2, user.getType());
-//            preparedStatement.setString(3, user.getUserPriority());
-//            preparedStatement.setString(4, user.getUserStatus());
-//            preparedStatement.executeUpdate();
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public void addUser(String login, String password, String name) {
+        try {
+            Statement st = connection.createStatement();
+// надо будет убрать
+            st.executeUpdate("drop table users");
+            st.executeUpdate("create table users(login VARCHAR(20), password VARCHAR(20), user_name VARCHAR(20), user_type VARCHAR(20))");
+//            st.executeUpdate("insert into users(login, password) values ('admin', 'password')");
+            st.close();
+            PreparedStatement preparedStatement = connection
+                    .prepareStatement("insert into users(login,password,user_name,user_type) values (?, ?, ?, ?)");
+            System.out.println("User: "+ login);
+            preparedStatement.setString(1, login);
+            preparedStatement.setString(2, password);
+            preparedStatement.setString(3, name);
+            preparedStatement.setString(4, "user");
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
     public Map<String, String> checkUser(String login, String password) {
         try {
@@ -63,4 +69,31 @@ public class AuthorisationService {
 
         return m;
     }
+
+    //* предварительно создай таблицу костылем в любом запросе как я делаю с юзер
+    public void addSOS(String login, double lat, double lng) {
+        try {
+            PreparedStatement preparedStatement = connection
+                    .prepareStatement("insert into sos(login,lat,lng,status) values (?, ?, ?, ?)");
+            System.out.println("User: "+ login);
+            preparedStatement.setString(1, login);
+            preparedStatement.setDouble(2, lat);
+            preparedStatement.setDouble(3, lng);
+            preparedStatement.setString(4, "Filed");
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getSOSList(String login) {
+        try {
+            PreparedStatement preparedStatement = connection
+                    .prepareStatement("select * from sos where status='Filed'");
+            ResultSet rs = preparedStatement.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
