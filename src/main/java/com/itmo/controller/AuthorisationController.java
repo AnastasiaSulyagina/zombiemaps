@@ -20,15 +20,9 @@ public class AuthorisationController {
     @Autowired
     private AuthorisationService authorisationService;// = new AuthorisationService();
 
-//    @RequestMapping(value="/users",method = RequestMethod.GET,headers="Accept=application/json")
-//    public List<task> getAllTasks() {
-//        List<task> tasks=taskmanagerservice.getAllTasks();
-//        return tasks;
-//    }
-
     @RequestMapping(
             value = "/login",
-            params = { "login", "password" },
+            params = { "login", "password"},
             method = RequestMethod.GET,
             headers="Accept=application/json")
     @ResponseBody
@@ -38,6 +32,21 @@ public class AuthorisationController {
     ) {
         return new ResponseEntity<>(authorisationService.checkUser(login, password), HttpStatus.OK);
     }
+
+    @RequestMapping(
+            value = "/register",
+            params = { "login", "password", "name"},
+            method = RequestMethod.GET,
+            headers="Accept=application/json")
+    @ResponseBody
+    public ResponseEntity addNewUser(
+            @RequestParam("login") String login,
+            @RequestParam("password") String password,
+            @RequestParam("name") String name
+    ) {
+        return new ResponseEntity<>(authorisationService.addUser(login, password, name), HttpStatus.OK);
+    }
+
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {

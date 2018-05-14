@@ -8,7 +8,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.itmo.model.User;
 import com.itmo.utility.DBUtility;
+import com.itmo.utility.EncryptionUtility;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,83 +19,122 @@ public class AuthorisationService {
     public AuthorisationService() {
         connection = DBUtility.getConnection();
     }
-    public void addUser(String login, String password, String name) {
+
+    private void createUsersTable() {
+
         try {
             Statement st = connection.createStatement();
-// надо будет убрать
-            st.executeUpdate("drop table users");
-            st.executeUpdate("create table users(login VARCHAR(20), password VARCHAR(20), user_name VARCHAR(20), user_type VARCHAR(20))");
-//            st.executeUpdate("insert into users(login, password) values ('admin', 'password')");
+            try {
+                st.executeQuery("drop table users");
+                st.executeQuery("drop sequence seq_users");
+
+            } catch (SQLException se) {
+                //Игнорировать ошибку удаления таблицы
+                if (se.getErrorCode() == 942) {
+                    String msg = se.getMessage();
+                    System.out.println("Ошибка при удалении таблицы: " + msg);
+                }
+            }
+            st.addBatch("create table users(id NUMBER(4) PRIMARY KEY, " +//GENERATED ALWAYS as IDENTITY(START with 1 INCREMENT by 1)
+                    "login VARCHAR(20) UNIQUE, password VARCHAR(100), user_name VARCHAR(20), role VARCHAR(20))");
+            st.addBatch("CREATE SEQUENCE seq_users START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE");
+            st.addBatch("CREATE OR REPLACE TRIGGER trg_user_id BEFORE INSERT ON users FOR EACH ROW BEGIN :NEW.id := seq_users.NextVal; END;");
+
+            st.addBatch("INSERT INTO users (login, password, user_name, role) " +
+                    "VALUES('lam', '" + EncryptionUtility.encrypt("password_lam") + "', 'Lambert Kendal', 'user')");
+            st.addBatch("INSERT INTO users (login, password, user_name, role) " +
+                    "VALUES('morgan', '"+ EncryptionUtility.encrypt("password_morgan") +"', 'Morgan Jones', 'user')");
+
+            st.addBatch("INSERT INTO users (login, password, user_name, role) " +
+                    "VALUES('shane', '"+ EncryptionUtility.encrypt("password_shane") +"', 'Shane Walsh', 'rick')");
+            st.addBatch("INSERT INTO users (login, password, user_name, role) " +
+                    "VALUES('rick', '"+ EncryptionUtility.encrypt("password_rick") +"', 'Rick Grimes', 'rick')");
+            st.executeBatch();
             st.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Map<String, String> addUser(String login, String password, String name) {
+        Map<String, String> m = new HashMap<>();
+        try {
+            createUsersTable();
             PreparedStatement preparedStatement = connection
-                    .prepareStatement("insert into users(login,password,user_name,user_type) values (?, ?, ?, ?)");
+                    .prepareStatement("insert into users(login,password,user_name,role) values (?, ?, ?, ?)");
             System.out.println("User: "+ login);
             preparedStatement.setString(1, login);
-            preparedStatement.setString(2, password);
+            preparedStatement.setString(2, EncryptionUtility.encrypt(password));
             preparedStatement.setString(3, name);
             preparedStatement.setString(4, "user");
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
+            if (e.getErrorCode() == 1)
+                m.put("message", "Login already exists");
+            else
+                m.put("message", "Something went wrong");
             e.printStackTrace();
         }
-    }
-
-    public Map<String, String> checkUser(String login, String password) {
-        try {
-//            Statement st = connection.createStatement();
-//            st.executeUpdate("insert into users(login, password) values ('admin', 'password')");
-//            st.close();
-            PreparedStatement preparedStatement = connection
-                    .prepareStatement("select COUNT(*) from users where login=? and password=?");
-            // Parameters start with 1
-            preparedStatement.setString(1, login);
-            preparedStatement.setString(2, password);
-            ResultSet rs = preparedStatement.executeQuery();
-            rs.next();
-            Boolean userExists = rs.getInt(1) > 0;
-            rs.close();
-            Map<String, String> m = new HashMap<>();
-            m.put("status", (userExists?"complete": "error"));
-            if (userExists) {
-                m.put("name", login);
-            } else {
-                m.put("message", "Invalid email and/or password. Please try again.");
-            }
-            return m;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        Map<String, String> m = new HashMap<>();
-        m.put("status", "error");
-        m.put("message", "Something went wrong. Please try again.");
-
         return m;
     }
 
-    //* предварительно создай таблицу костылем в любом запросе как я делаю с юзер
-    public void addSOS(String login, double lat, double lng) {
+    public Map<String, String> checkUser(String login, String password) {
+        Map<String, String> m = new HashMap<>();
         try {
             PreparedStatement preparedStatement = connection
-                    .prepareStatement("insert into sos(login,lat,lng,status) values (?, ?, ?, ?)");
-            System.out.println("User: "+ login);
+                    .prepareStatement("select * from users where login=? and password=?");
+
             preparedStatement.setString(1, login);
-            preparedStatement.setDouble(2, lat);
-            preparedStatement.setDouble(3, lng);
-            preparedStatement.setString(4, "Filed");
-            preparedStatement.executeUpdate();
+            preparedStatement.setString(2, EncryptionUtility.encrypt(password));
+            ResultSet rs = preparedStatement.executeQuery();
+            rs.next();
+            User user = new User(rs.getInt("id"),
+                    rs.getString("login"),
+                    rs.getString("password"),
+                    rs.getString("user_name"),
+                    rs.getString("role"));
+            rs.close();
+            m.put("status", "complete");
+            m.put("name", user.getName());
+            m.put("role", user.getRole());
+            m.put("message", "Log in successful");
+            return m;
         } catch (SQLException e) {
             e.printStackTrace();
+            m.put("status", "error");
+            m.put("message", "Invalid email and/or password. Please try again.");
         }
+        return m;
     }
 
-    public void getSOSList(String login) {
+    public String getUserName(String login) {
         try {
             PreparedStatement preparedStatement = connection
-                    .prepareStatement("select * from sos where status='Filed'");
+                    .prepareStatement("select user_name from users where login=?");
+
+            preparedStatement.setString(1, login);
             ResultSet rs = preparedStatement.executeQuery();
+            rs.next();
+            String name = rs.getString("user_name");
+            rs.close();
+            return name;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void removeUser(String login, String password) {
+        try {
+            PreparedStatement preparedStatement = connection
+                    .prepareStatement("delete from users where login=? and password=?");
+
+            preparedStatement.setString(1, login);
+            preparedStatement.setString(2, EncryptionUtility.encrypt(password));
+            ResultSet rs = preparedStatement.executeQuery();
+            rs.next();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
-
 }
