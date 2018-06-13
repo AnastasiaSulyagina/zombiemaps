@@ -59,7 +59,7 @@ public class AuthorisationService {
     public Map<String, String> addUser(String login, String password, String name) {
         Map<String, String> m = new HashMap<>();
         try {
-            createUsersTable();
+            //createUsersTable();
             PreparedStatement preparedStatement = connection
                     .prepareStatement("insert into users(login,password,user_name,role) values (?, ?, ?, ?)");
             System.out.println("User: "+ login);
