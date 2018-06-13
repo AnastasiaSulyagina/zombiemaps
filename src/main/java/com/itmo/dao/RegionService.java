@@ -104,7 +104,7 @@ public class RegionService {
         try {
             //createRegionsTable();
             PreparedStatement preparedStatement = connection
-                    .prepareStatement("INSERT INTO regions (region_name, dangerLevel, description) VALUES(?, ?, ?, ?, ?, ?)");
+                    .prepareStatement("INSERT INTO regions (region_name, dangerLevel, description, lat, lng, rad) VALUES(?, ?, ?, ?, ?, ?)");
             preparedStatement.setString(1, name);
             //  preparedStatement.setString(2, login);
             preparedStatement.setInt(2, dangerLevel);
