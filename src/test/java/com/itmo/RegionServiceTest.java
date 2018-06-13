@@ -22,7 +22,7 @@ public class RegionServiceTest {
 
     @Test
     public void changeRegionTest() {
-        s.addRegion("test", 1, "test");
+        s.addRegion("test", 1, "test", 0, 0, 0);
         Region r = s.getRegionByName("test");
         s.changeRegionState(r.getId(), 10, "Bad");
         r = s.getRegionByName("test");
