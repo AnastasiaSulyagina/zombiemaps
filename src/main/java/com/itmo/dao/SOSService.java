@@ -35,16 +35,16 @@ public class SOSService {
                 }
             }
             st.addBatch("create table SOS(id NUMBER(4) PRIMARY KEY, " +
-                    "login VARCHAR(20), lat DOUBLE PRECISION, lng DOUBLE PRECISION, description VARCHAR(200), state VARCHAR(20))");
+                    "login VARCHAR(20), lat DOUBLE PRECISION, lng DOUBLE PRECISION, description VARCHAR(200), state VARCHAR(20), report VARCHAR(200))");
             st.addBatch("CREATE SEQUENCE seq_sos START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE");
             st.addBatch("CREATE OR REPLACE TRIGGER trg_sos_id BEFORE INSERT ON SOS FOR EACH ROW BEGIN :NEW.id := seq_sos.NextVal; END;");
 
-            st.addBatch("INSERT INTO SOS (login, lat, lng, description, state) " +
-                    "VALUES('user1', 59.906958, 30.302391100000023, 'HELP! 20 zombies attacking the supermarket, will not hold long', 'Filed')");
-            st.addBatch("INSERT INTO SOS (login, lat, lng, description, state) " +
-                    "VALUES('user2', 59.9286248, 30.360498399999983, 'Barricaded in the trade center, group of 50 people, help!', 'Filed')");
-            st.addBatch("INSERT INTO SOS (login, lat, lng, description, state) " +
-                    "VALUES('user3', 59.80291259999999, 30.267839099999946, '', 'Filed')");
+            st.addBatch("INSERT INTO SOS (login, lat, lng, description, state, report) " +
+                    "VALUES('user1', 59.906958, 30.302391100000023, 'HELP! 20 zombies attacking the supermarket, will not hold long', 'Filed', ' ')");
+            st.addBatch("INSERT INTO SOS (login, lat, lng, description, state, report) " +
+                    "VALUES('user2', 59.9286248, 30.360498399999983, 'Barricaded in the trade center, group of 50 people, help!', 'Filed', ' ')");
+            st.addBatch("INSERT INTO SOS (login, lat, lng, description, state, report) " +
+                    "VALUES('user3', 59.80291259999999, 30.267839099999946, 'Lots of zombies here!!!', 'Filed', ' ')");
             st.executeBatch();
             st.close();
         } catch (SQLException e) {
@@ -56,8 +56,7 @@ public class SOSService {
     public Map<String, String> addSOS(String login, double lat, double lng, String description) {
         Map<String, String> m = new HashMap<>();
         Boolean sosExists;
-        try {
-            //createSOSTable();
+        try { //createSOSTable();
             PreparedStatement preparedStatement1 = connection.prepareStatement("select COUNT(*) from SOS where lat=? and lng=?");
             preparedStatement1.setDouble(1, lat);
             preparedStatement1.setDouble(2, lng);
@@ -68,7 +67,7 @@ public class SOSService {
             m.put("status", (!sosExists?"complete": "error"));
             if (!sosExists) {
                 PreparedStatement preparedStatement = connection
-                        .prepareStatement("insert into SOS(login, lat, lng, description, state) values (?, ?, ?, ?, ?)");
+                        .prepareStatement("insert into SOS(login, lat, lng, description, state, report) values (?, ?, ?, ?, ?, ?)");
                 preparedStatement.setString(1, login);
                 //  preparedStatement.setString(2, login);
                 preparedStatement.setDouble(2, lat);
@@ -76,6 +75,7 @@ public class SOSService {
 
                 preparedStatement.setString(4, description);
                 preparedStatement.setString(5, "Filed");
+                preparedStatement.setString(6, " ");
                 preparedStatement.executeUpdate();
                 m.put("message", "SOS filed. Please wait.");
 
@@ -92,8 +92,9 @@ public class SOSService {
     public List<SOS> getSOSList() {
         List<SOS> l = new ArrayList<>();
         try {
+            //createSOSTable();
             PreparedStatement preparedStatement = connection
-                    .prepareStatement("select * from sos where state='Filed'");
+                    .prepareStatement("select * from sos");
             ResultSet rs = preparedStatement.executeQuery();
 
             // Fetch each row from the result set
@@ -103,7 +104,8 @@ public class SOSService {
                         rs.getString("lat"),
                         rs.getString("lng"),
                         rs.getString("description"),
-                        rs.getString("state"));
+                        rs.getString("state"),
+                        rs.getString("report"));
                 l.add(sos);
             }
         } catch (SQLException e) {
@@ -129,6 +131,23 @@ public class SOSService {
         return m;
     }
 
+    public Map<String, String> addSOSReport(Integer id, String report) {
+        Map<String, String> m = new HashMap<>();
+        try {
+            Statement st = connection.createStatement();
+            PreparedStatement preparedStatement = connection
+                    .prepareStatement("update SOS set report = ? where id = ?");
+            preparedStatement.setString(1, report);
+            preparedStatement.setInt(2, id);
+            preparedStatement.executeUpdate();
+            m.put("status", "complete");
+            return m;
+        } catch (SQLException e) {
+            m.put("status", "error");
+        }
+        return m;
+    }
+
     public List<SOS> getSOSByLogin(String login) {
         List<SOS> l = new ArrayList<>();
         try {
@@ -143,7 +162,8 @@ public class SOSService {
                         rs.getString("lat"),
                         rs.getString("lng"),
                         rs.getString("description"),
-                        rs.getString("state"));
+                        rs.getString("state"),
+                        rs.getString("report"));
                 l.add(sos);
             }
         } catch (SQLException e) {

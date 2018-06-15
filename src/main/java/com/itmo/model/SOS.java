@@ -13,6 +13,17 @@ public class SOS {
     private String userLogin;
     private String description;
     private String state;
+    private String report = " ";
+
+    public SOS(int newId, String newLogin, String newLat, String newLng, String newDescription, String newState, String newReport) {
+        this.id = newId;
+        this.userLogin = newLogin;
+        this.lat = newLat;
+        this.lng = newLng;
+        this.description = newDescription;
+        this.state = newState;
+        this.report = newReport;
+    }
 
     public SOS(int newId, String newLogin, String newLat, String newLng, String newDescription, String newState) {
         this.id = newId;
@@ -21,6 +32,7 @@ public class SOS {
         this.lng = newLng;
         this.description = newDescription;
         this.state = newState;
+        this.report = " ";
     }
 
     public Map<String, String> serialize() {
@@ -31,6 +43,7 @@ public class SOS {
         m.put("lng", this.lng);
         m.put("description", this.description);
         m.put("state", this.state);
+        m.put("report", this.report);
         return m;
     }
 

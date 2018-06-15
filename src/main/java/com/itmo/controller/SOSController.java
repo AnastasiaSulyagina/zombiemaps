@@ -46,6 +46,19 @@ public class SOSController {
     }
 
     @RequestMapping(
+            value = "/sos/report",
+            params = { "id", "report"},
+            method = RequestMethod.GET,
+            headers="Accept=application/json")
+    @ResponseBody
+    public ResponseEntity addSOSReport(
+            @RequestParam("id") Integer id,
+            @RequestParam("report") String report
+    ) {
+        return new ResponseEntity<>(SOSService.addSOSReport(id, report), HttpStatus.OK);
+    }
+
+    @RequestMapping(
             value = "/sos/list",
             method = RequestMethod.GET,
             headers="Accept=application/json")
