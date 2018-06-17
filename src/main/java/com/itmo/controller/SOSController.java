@@ -27,7 +27,7 @@ public class SOSController {
             @RequestParam("login") String login,
             @RequestParam("lat") Double lat,
             @RequestParam("lng") Double lng,
-            @RequestParam("lng") String description
+            @RequestParam("description") String description
     ) {
         return new ResponseEntity<>(SOSService.addSOS(login, lat, lng, description), HttpStatus.OK);
     }
