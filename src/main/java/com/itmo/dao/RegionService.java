@@ -60,7 +60,7 @@ public class RegionService {
     public List<Region> getRegionList() {
         List<Region> l = new ArrayList();
         try {
-            createRegionsTable();
+            //createRegionsTable();
             PreparedStatement preparedStatement = connection
                     .prepareStatement("select * from regions");
             ResultSet rs = preparedStatement.executeQuery();
