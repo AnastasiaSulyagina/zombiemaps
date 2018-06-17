@@ -20,7 +20,9 @@ public class DBUtility {
         else {
             try {
                 Properties prop = new Properties();
-                InputStream inputStream = new java.io.FileInputStream("application.properties");
+                InputStream inputStream = DBUtility.class.getResourceAsStream("/application.properties");
+                        //new java.io.FileInputStream("classpath:/application.properties");
+
                 prop.load(inputStream);
                 String driver = prop.getProperty("jdbc.drivers");
                 String url = prop.getProperty("jdbc.url");
