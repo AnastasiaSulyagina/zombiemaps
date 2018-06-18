@@ -40,11 +40,15 @@ public class SOSService {
             st.addBatch("CREATE OR REPLACE TRIGGER trg_sos_id BEFORE INSERT ON SOS FOR EACH ROW BEGIN :NEW.id := seq_sos.NextVal; END;");
 
             st.addBatch("INSERT INTO SOS (login, lat, lng, description, state, report) " +
-                    "VALUES('user1', 59.906958, 30.302391100000023, 'HELP! 20 zombies attacking the supermarket, will not hold long', 'Filed', ' ')");
+                    "VALUES('lam', 59.906958, 30.302391100000023, 'HELP! 20 zombies attacking the supermarket, will not hold long', 'Filed', ' ')");
             st.addBatch("INSERT INTO SOS (login, lat, lng, description, state, report) " +
-                    "VALUES('user2', 59.9286248, 30.360498399999983, 'Barricaded in the trade center, group of 50 people, help!', 'Filed', ' ')");
+                    "VALUES('lam', 59.9286248, 30.360498399999983, 'Barricaded in the trade center, group of 50 people, help!', 'Filed', ' ')");
             st.addBatch("INSERT INTO SOS (login, lat, lng, description, state, report) " +
-                    "VALUES('user3', 59.80291259999999, 30.267839099999946, 'Lots of zombies here!!!', 'Filed', ' ')");
+                    "VALUES('morgan', 59.80291259999999, 30.267839099999946, 'Lots of zombies here!!!', 'Filed', ' ')");
+            st.addBatch("INSERT INTO SOS (login, lat, lng, description, state, report) " +
+                    "VALUES('morgan', 59.882588042895534, 30.23662609997554, 'SOS!!!', 'Filed', ' ')");
+            st.addBatch("INSERT INTO SOS (login, lat, lng, description, state, report) " +
+                    "VALUES('morgan', 59.9508523867860759, 30.245294999511668, 'Help please its really bad!!!', 'Filed', ' ')");
             st.executeBatch();
             st.close();
         } catch (SQLException e) {
@@ -94,7 +98,7 @@ public class SOSService {
         try {
             //createSOSTable();
             PreparedStatement preparedStatement = connection
-                    .prepareStatement("select * from sos");
+                    .prepareStatement("select * from sos where state not in ( 'Finished', 'Not processed')");
             ResultSet rs = preparedStatement.executeQuery();
 
             // Fetch each row from the result set

@@ -43,13 +43,13 @@ public class RegionService {
             st.addBatch("INSERT INTO regions (region_name, dangerLevel, description, lat, lng, rad) " +
                     "VALUES('Admiralteysky', 1, 'Not dangerous', 59.9108957, 30.295336099999986, 1000)");
             st.addBatch("INSERT INTO regions (region_name, dangerLevel, description, lat, lng, rad) " +
-                    "VALUES('Sennoy', 10, 'Zombies settled in locations a, b, c. Lots of them. Not safe to visit', 59.92617899999999,30.318023999999923, 1000)");
+                    "VALUES('Sennoy', 10, 'Lots of zombies. Not safe', 59.92617899999999,30.318023999999923, 1000)");
             st.addBatch("INSERT INTO regions (region_name, dangerLevel, description, lat, lng, rad) " +
-                    "VALUES('Yekateringofsky', 8, 'Multiple packs of zombies seen, go in big groups only', 59.88266460000001,30.2143413, 1200)");
+                    "VALUES('Yekateringofsky', 8, 'Multiple groups seen', 59.88266460000001,30.2143413, 1500)");
             st.addBatch("INSERT INTO regions (region_name, dangerLevel, description, lat, lng, rad) " +
-                    "VALUES('Kirovsky', 4, 'Couple of zompie packs seen, easy to avoid', 59.8512329,30.25335110000003, 800)");
+                    "VALUES('Kirovsky', 4, 'Some zombies. Can avoid', 59.8512329,30.25335110000003, 1700)");
             st.addBatch("INSERT INTO regions (region_name, dangerLevel, description, lat, lng, rad) " +
-                    "VALUES('Nevsky', 6, 'Zombies seen in location a, tend to stalk around a lot. Go in small groups', 59.93119429999999,30.362370000000055, 1000)");
+                    "VALUES('Nevsky', 6, 'Zombies seen. Careful', 59.93119429999999,30.362370000000055, 1100)");
             st.executeBatch();
             st.close();
         } catch (SQLException e) {
